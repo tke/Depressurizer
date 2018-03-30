@@ -87,6 +87,9 @@
       <HintPath>..\packages\Costura.Fody.1.6.2\lib\dotnet\Costura.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="HtmlAgilityPack, Version=1.7.2.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>..\packages\HtmlAgilityPack.1.7.2\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
     <Reference Include="MaterialSkin, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MaterialSkin.0.2.1\lib\MaterialSkin.dll</HintPath>
     </Reference>
@@ -108,11 +111,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AutoCat\AutoCatCompletionistMe.cs" />
     <Compile Include="AutoCat\AutoCatConfigPanel_Curator.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="AutoCat\AutoCatConfigPanel_Curator.Designer.cs">
       <DependentUpon>AutoCatConfigPanel_Curator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AutoCat\AutoCatConfigPanel_CompletionistMe.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="AutoCat\AutoCatConfigPanel_CompletionistMe.Designer.cs">
+      <DependentUpon>AutoCatConfigPanel_CompletionistMe.cs</DependentUpon>
     </Compile>
     <Compile Include="AutoCat\AutoCatConfigPanel_Platform.cs">
       <SubType>UserControl</SubType>
@@ -384,6 +394,9 @@
     <Compile Include="Models\ToolStripItemComparer.cs" />
     <EmbeddedResource Include="AutoCat\AutoCatConfigPanel_Curator.resx">
       <DependentUpon>AutoCatConfigPanel_Curator.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AutoCat\AutoCatConfigPanel_CompletionistMe.resx">
+      <DependentUpon>AutoCatConfigPanel_CompletionistMe.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="AutoCat\AutoCatConfigPanel_Language.resx">
       <DependentUpon>AutoCatConfigPanel_Language.cs</DependentUpon>

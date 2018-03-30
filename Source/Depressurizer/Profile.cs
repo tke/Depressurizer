@@ -167,9 +167,19 @@ namespace Depressurizer
 			ach.Rules.Add(new Hltb_Rule("20-50", 20, 50, TimeType.Extras));
 			ach.Rules.Add(new Hltb_Rule("50+", 20, 0, TimeType.Extras));
 			list.Add(ach);
+            
+            //By CME
+            AutoCatCompletionistMe cme = new AutoCatCompletionistMe("By C.me", null, "(C.me) ", false);
+            cme.Rules.Add(new CMe_Rule(" 0-20", 0, 20));
+            cme.Rules.Add(new CMe_Rule("20-40", 20, 40));
+            cme.Rules.Add(new CMe_Rule("40-60", 40, 60));
+            cme.Rules.Add(new CMe_Rule("60-80", 60, 80));
+            cme.Rules.Add(new CMe_Rule("80-100", 80, 100));
+            cme.Rules.Add(new CMe_Rule("Hundo", 100, 0));
+            list.Add(cme);
 
-			//By Platform
-			AutoCatPlatform acPlatform = new AutoCatPlatform(GlobalStrings.Profile_DefaultAutoCatName_Platform, null, "(" + GlobalStrings.AutoCat_Name_Platform + ") ", true, true, true, true);
+            //By Platform
+            AutoCatPlatform acPlatform = new AutoCatPlatform(GlobalStrings.Profile_DefaultAutoCatName_Platform, null, "(" + GlobalStrings.AutoCat_Name_Platform + ") ", true, true, true, true);
 			list.Add(acPlatform);
 		}
 

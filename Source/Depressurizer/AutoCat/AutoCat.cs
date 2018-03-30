@@ -81,7 +81,8 @@ namespace Depressurizer
         [Description("AutoCatVrSupport")] VrSupport,
         [Description("AutoCatLanguage")] Language,
         [Description("AutoCatCurator")] Curator,
-        [Description("AutoCatPlatform")] Platform
+        [Description("AutoCatPlatform")] Platform,
+        [Description("AutoCatCompletionistMe")] CompletionistMe
     }
 
     public enum AutoCatResult
@@ -256,6 +257,8 @@ namespace Depressurizer
                     return AutoCatCurator.LoadFromXmlElement(xElement, typeof(AutoCatCurator));
                 case AutoCatPlatform.TypeIdString:
                     return AutoCatPlatform.LoadFromXmlElement(xElement, typeof(AutoCatPlatform));
+                case AutoCatCompletionistMe.TypeIdString:
+                    return AutoCatCompletionistMe.LoadFromXmlElement(xElement);
                 default:
                     return null;
             }
@@ -294,6 +297,8 @@ namespace Depressurizer
                     return new AutoCatCurator(name);
                 case AutoCatType.Platform:
                     return new AutoCatPlatform(name);
+                case AutoCatType.CompletionistMe:
+                    return new AutoCatCompletionistMe(name);
                 case AutoCatType.None:
                     return null;
                 default:

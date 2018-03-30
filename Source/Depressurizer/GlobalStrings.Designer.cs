@@ -70,6 +70,15 @@ namespace Depressurizer {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Completionist.me.
+        /// </summary>
+        internal static string AutoCat_Name_CompletionistMe {
+            get {
+                return ResourceManager.GetString("AutoCat_Name_CompletionistMe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Curator.
         /// </summary>
         internal static string AutoCat_Name_Curator {
