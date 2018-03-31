@@ -34,6 +34,9 @@
             this.lblUnstartedText = new System.Windows.Forms.Label();
             this.chkIncludeUnstarted = new System.Windows.Forms.CheckBox();
             this.grpRules = new System.Windows.Forms.GroupBox();
+            this.chkStopProcessing = new System.Windows.Forms.CheckBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.cmbStatus = new System.Windows.Forms.ComboBox();
             this.helpRules = new System.Windows.Forms.Label();
             this.cmdRuleDown = new System.Windows.Forms.Button();
             this.cmdRuleUp = new System.Windows.Forms.Button();
@@ -50,9 +53,7 @@
             this.lblPrefix = new System.Windows.Forms.Label();
             this.txtPrefix = new System.Windows.Forms.TextBox();
             this.ttHelp = new Depressurizer.Lib.ExtToolTip();
-            this.cmbStatus = new System.Windows.Forms.ComboBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.cbStopProcessing = new System.Windows.Forms.CheckBox();
+            this.chkCleanExisting = new System.Windows.Forms.CheckBox();
             this.grpMain.SuspendLayout();
             this.grpRules.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numRuleMinProgress)).BeginInit();
@@ -61,6 +62,7 @@
             // 
             // grpMain
             // 
+            this.grpMain.Controls.Add(this.chkCleanExisting);
             this.grpMain.Controls.Add(this.helpUnknown);
             this.grpMain.Controls.Add(this.txtUnstartedText);
             this.grpMain.Controls.Add(this.lblUnstartedText);
@@ -118,7 +120,7 @@
             this.grpRules.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.grpRules.Controls.Add(this.cbStopProcessing);
+            this.grpRules.Controls.Add(this.chkStopProcessing);
             this.grpRules.Controls.Add(this.label1);
             this.grpRules.Controls.Add(this.cmbStatus);
             this.grpRules.Controls.Add(this.helpRules);
@@ -139,6 +141,33 @@
             this.grpRules.TabIndex = 4;
             this.grpRules.TabStop = false;
             this.grpRules.Text = "Rules";
+            // 
+            // chkStopProcessing
+            // 
+            this.chkStopProcessing.AutoSize = true;
+            this.chkStopProcessing.Location = new System.Drawing.Point(189, 145);
+            this.chkStopProcessing.Name = "chkStopProcessing";
+            this.chkStopProcessing.Size = new System.Drawing.Size(207, 17);
+            this.chkStopProcessing.TabIndex = 14;
+            this.chkStopProcessing.Text = "Stop Processing Rules when Matched";
+            this.chkStopProcessing.UseVisualStyleBackColor = true;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(186, 49);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(40, 13);
+            this.label1.TabIndex = 13;
+            this.label1.Text = "Status:";
+            // 
+            // cmbStatus
+            // 
+            this.cmbStatus.FormattingEnabled = true;
+            this.cmbStatus.Location = new System.Drawing.Point(248, 46);
+            this.cmbStatus.Name = "cmbStatus";
+            this.cmbStatus.Size = new System.Drawing.Size(130, 21);
+            this.cmbStatus.TabIndex = 12;
             // 
             // helpRules
             // 
@@ -291,32 +320,15 @@
             this.txtPrefix.Size = new System.Drawing.Size(165, 20);
             this.txtPrefix.TabIndex = 1;
             // 
-            // cmbStatus
+            // chkCleanExisting
             // 
-            this.cmbStatus.FormattingEnabled = true;
-            this.cmbStatus.Location = new System.Drawing.Point(248, 46);
-            this.cmbStatus.Name = "cmbStatus";
-            this.cmbStatus.Size = new System.Drawing.Size(130, 21);
-            this.cmbStatus.TabIndex = 12;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(188, 49);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(40, 13);
-            this.label1.TabIndex = 13;
-            this.label1.Text = "Status:";
-            // 
-            // cbStopProcessing
-            // 
-            this.cbStopProcessing.AutoSize = true;
-            this.cbStopProcessing.Location = new System.Drawing.Point(248, 144);
-            this.cbStopProcessing.Name = "cbStopProcessing";
-            this.cbStopProcessing.Size = new System.Drawing.Size(103, 17);
-            this.cbStopProcessing.TabIndex = 14;
-            this.cbStopProcessing.Text = "Stop Processing";
-            this.cbStopProcessing.UseVisualStyleBackColor = true;
+            this.chkCleanExisting.AutoSize = true;
+            this.chkCleanExisting.Location = new System.Drawing.Point(178, 45);
+            this.chkCleanExisting.Name = "chkCleanExisting";
+            this.chkCleanExisting.Size = new System.Drawing.Size(210, 17);
+            this.chkCleanExisting.TabIndex = 14;
+            this.chkCleanExisting.Text = "Clean Existing Rules before Processing";
+            this.chkCleanExisting.UseVisualStyleBackColor = true;
             // 
             // AutoCatConfigPanel_CompletionistMe
             // 
@@ -359,8 +371,9 @@
         private System.Windows.Forms.Label lblUnstartedText;
         private System.Windows.Forms.CheckBox chkIncludeUnstarted;
         private System.Windows.Forms.Label helpRules;
-        private System.Windows.Forms.CheckBox cbStopProcessing;
+        private System.Windows.Forms.CheckBox chkStopProcessing;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox cmbStatus;
+        private System.Windows.Forms.CheckBox chkCleanExisting;
     }
 }

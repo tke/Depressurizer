@@ -61,35 +61,38 @@ namespace Depressurizer
             numRuleMinProgress.DataBindings.Add("Value", binding, "Min");
             numRuleMaxProgress.DataBindings.Add("Value", binding, "Max");
             cmbStatus.DataBindings.Add("SelectedItem", binding, "Status");
-            cbStopProcessing.DataBindings.Add("Checked", binding, "StopProcessing");
+            chkStopProcessing.DataBindings.Add("Checked", binding, "StopProcessing");
 
             UpdateEnabledSettings();
         }
 
         public override void SaveToAutoCat(AutoCat ac)
         {
-            AutoCatCompletionistMe acHltb = ac as AutoCatCompletionistMe;
-            if (acHltb == null) return;
+            AutoCatCompletionistMe acCme = ac as AutoCatCompletionistMe;
+            if (acCme == null) return;
 
-            acHltb.Prefix = txtPrefix.Text;
-            acHltb.IncludeUnstarted = chkIncludeUnstarted.Checked;
-            acHltb.UnstartedText = txtUnstartedText.Text;
-            acHltb.Rules = new List<CMe_Rule>(ruleList);
+            acCme.Prefix = txtPrefix.Text;
+            acCme.IncludeUnstarted = chkIncludeUnstarted.Checked;
+            acCme.UnstartedText = txtUnstartedText.Text;
+            acCme.CleanExisting = chkCleanExisting.Checked;
+            acCme.Rules = new List<CMe_Rule>(ruleList);
         }
 
         public override void LoadFromAutoCat(AutoCat ac)
         {
-            AutoCatCompletionistMe acHltb = ac as AutoCatCompletionistMe;
-            if (acHltb == null) return;
+            AutoCatCompletionistMe acCme = ac as AutoCatCompletionistMe;
+            if (acCme == null) return;
 
-            txtPrefix.Text = acHltb.Prefix;
-            chkIncludeUnstarted.Checked = acHltb.IncludeUnstarted;
-            txtUnstartedText.Text = (acHltb.UnstartedText == null) ? string.Empty : acHltb.UnstartedText;
-            acHltb.IncludeUnstarted = chkIncludeUnstarted.Checked;
-            acHltb.UnstartedText = txtUnstartedText.Text;
+            txtPrefix.Text = acCme.Prefix;
+            chkIncludeUnstarted.Checked = acCme.IncludeUnstarted;
+            chkCleanExisting.Checked = acCme.CleanExisting;
+            txtUnstartedText.Text = (acCme.UnstartedText == null) ? string.Empty : acCme.UnstartedText;
+            acCme.IncludeUnstarted = chkIncludeUnstarted.Checked;
+            acCme.CleanExisting = chkCleanExisting.Checked;
+            acCme.UnstartedText = txtUnstartedText.Text;
 
             ruleList.Clear();
-            foreach (CMe_Rule rule in acHltb.Rules)
+            foreach (CMe_Rule rule in acCme.Rules)
             {
                 ruleList.Add(new CMe_Rule(rule));
             }
@@ -105,7 +108,7 @@ namespace Depressurizer
 
             txtRuleName.Enabled =
                 numRuleMaxProgress.Enabled = numRuleMinProgress.Enabled =
-                cmbStatus.Enabled = cbStopProcessing.Enabled =
+                cmbStatus.Enabled = chkStopProcessing.Enabled =
                         cmdRuleRemove.Enabled = ruleSelected;
             cmdRuleUp.Enabled = ruleSelected && lstRules.SelectedIndex != 0;
             cmdRuleDown.Enabled = ruleSelected = ruleSelected && lstRules.SelectedIndex != lstRules.Items.Count - 1;

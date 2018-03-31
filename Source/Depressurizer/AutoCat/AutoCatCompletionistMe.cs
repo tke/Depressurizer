@@ -61,6 +61,7 @@ namespace Depressurizer
 
         public string Prefix { get; set; }
         public bool IncludeUnstarted { get; set; }
+        public bool CleanExisting { get; set; }
         public string UnstartedText { get; set; }
         [XmlElement("Rule")]
         public List<CMe_Rule> Rules;
@@ -80,6 +81,7 @@ namespace Depressurizer
             XmlName_Prefix = "Prefix",
             XmlName_IncludeUnstarted = "IncludeUnstarted",
             XmlName_UnstartedText = "UnstartedText",
+            XmlName_CleanExisting = "CleanExisting",
             XmlName_Rule = "Rule",
             XmlName_Rule_Text = "Text",
             XmlName_Rule_Min = "Min",
@@ -92,7 +94,7 @@ namespace Depressurizer
         #region Construction
 
         public AutoCatCompletionistMe(string name, string filter = null, string prefix = null,
-            bool includeUnstarted = true, string unstartedText = "", List<CMe_Rule> rules = null, bool selected = false)
+            bool includeUnstarted = true, string unstartedText = "", List<CMe_Rule> rules = null, bool selected = false, bool cleanExisting = true)
             : base(name)
         {
             Filter = filter;
@@ -101,6 +103,7 @@ namespace Depressurizer
             UnstartedText = unstartedText;
             Rules = rules ?? new List<CMe_Rule>();
             Selected = selected;
+            CleanExisting = cleanExisting;
         }
 
         //XmlSerializer requires a parameterless constructor
@@ -115,6 +118,7 @@ namespace Depressurizer
             UnstartedText = other.UnstartedText;
             Rules = other.Rules.ConvertAll(rule => new CMe_Rule(rule));
             Selected = other.Selected;
+            CleanExisting = other.CleanExisting;
         }
 
         public override AutoCat Clone()
@@ -163,20 +167,22 @@ namespace Depressurizer
 
         private static CMe_State ExtractGameProgress(HtmlNode gameDiv)
         {
-            int appId = int.Parse(gameDiv.SelectSingleNode(@".//a").GetAttributeValue("href", null)?.Split('/')?.Last());
-            var progressBar = gameDiv.SelectSingleNode(@".//div[@role='progressbar']");
-            if (progressBar != null)
+            if (int.TryParse(gameDiv.SelectSingleNode(@".//a").GetAttributeValue("href", null)?.Split('/')?.Last(), out int appId))
             {
-                var pbClass = progressBar.GetAttributeValue("class", "");
-                CMe_Status? status = null;
-                if (pbClass.Contains("progress-bar-perfect"))
-                    status = CMe_Status.Completed;
-                else if (pbClass.Contains("progress-bar-warning"))
-                    status = CMe_Status.UnderPar;
-                else if (pbClass.Contains("progress-bar-success"))
-                    status = CMe_Status.OverPar;
-                if (status != null && float.TryParse(progressBar?.GetAttributeValue("aria-valuenow", "-1"), out float progress))
-                    return new CMe_State { AppId = appId, Progress = progress, Status = status.Value };
+                var progressBar = gameDiv.SelectSingleNode(@".//div[@role='progressbar']");
+                if (progressBar != null)
+                {
+                    var pbClass = progressBar.GetAttributeValue("class", "");
+                    CMe_Status? status = null;
+                    if (pbClass.Contains("progress-bar-perfect"))
+                        status = CMe_Status.Completed;
+                    else if (pbClass.Contains("progress-bar-warning"))
+                        status = CMe_Status.UnderPar;
+                    else if (pbClass.Contains("progress-bar-success"))
+                        status = CMe_Status.OverPar;
+                    if (status != null && float.TryParse(progressBar?.GetAttributeValue("aria-valuenow", "-1"), out float progress))
+                        return new CMe_State { AppId = appId, Progress = progress, Status = status.Value };
+                }
             }
             return null;
         }
@@ -190,6 +196,25 @@ namespace Depressurizer
             }
 
             if (!game.IncludeGame(filter)) return AutoCatResult.Filtered;
+
+            if (CleanExisting)
+            {
+                if (IncludeUnstarted) {
+                    var existingUnstarted = game.Categories.FirstOrDefault(it => it.Name.Equals(GetProcessedString(UnstartedText)));
+                    if(existingUnstarted != null)
+                    {
+                        game.RemoveCategory(existingUnstarted);
+                    }
+                }
+                foreach (var rule in Rules)
+                {
+                    var existingCategory = game.Categories.FirstOrDefault(it => it.Name.Equals(GetProcessedString(rule.Name)));
+                    if (existingCategory != null)
+                    {
+                        game.RemoveCategory(existingCategory);
+                    }
+                }
+            }
 
             string result = null;
             if (CMeProgress.ContainsKey(game.Id))
