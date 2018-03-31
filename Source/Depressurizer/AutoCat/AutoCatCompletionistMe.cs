@@ -261,6 +261,7 @@ namespace Depressurizer
             if (Prefix != null) writer.WriteElementString(XmlName_Prefix, Prefix);
             writer.WriteElementString(XmlName_IncludeUnstarted, IncludeUnstarted.ToString().ToLowerInvariant());
             writer.WriteElementString(XmlName_UnstartedText, UnstartedText);
+            writer.WriteElementString(XmlName_CleanExisting, CleanExisting.ToString().ToLowerInvariant());
 
 
             foreach (CMe_Rule rule in Rules)
@@ -284,6 +285,7 @@ namespace Depressurizer
             string prefix = XmlUtil.GetStringFromNode(xElement[XmlName_Prefix], string.Empty);
             bool includeUnstarted = XmlUtil.GetBoolFromNode(xElement[XmlName_IncludeUnstarted], false);
             string unstartedText = XmlUtil.GetStringFromNode(xElement[XmlName_UnstartedText], string.Empty);
+            bool cleanExisting = XmlUtil.GetBoolFromNode(xElement[XmlName_CleanExisting], false);
 
             List<CMe_Rule> rules = new List<CMe_Rule>();
             foreach (XmlNode node in xElement.SelectNodes(XmlName_Rule))
@@ -295,7 +297,7 @@ namespace Depressurizer
                 bool ruleStopProcessing = XmlUtil.GetBoolFromAttribute(node, XmlName_Rule_StopProcessing, false);
                 rules.Add(new CMe_Rule(ruleName, ruleMin, ruleMax, ruleStatus, ruleStopProcessing));
             }
-            AutoCatCompletionistMe result = new AutoCatCompletionistMe(name, filter, prefix, includeUnstarted, unstartedText) { Rules = rules };
+            AutoCatCompletionistMe result = new AutoCatCompletionistMe(name, filter, prefix, includeUnstarted, unstartedText, cleanExisting: cleanExisting) { Rules = rules };
             return result;
         }
 
