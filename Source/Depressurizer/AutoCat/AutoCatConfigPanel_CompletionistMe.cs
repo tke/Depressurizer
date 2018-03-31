@@ -33,6 +33,14 @@ namespace Depressurizer
             InitializeComponent();
 
             //initialize combobox
+            cmbStatus.Items.AddRange(new object[]
+            {
+                CMe_Status.All,
+                CMe_Status.UnderPar,
+                CMe_Status.OverPar,
+                CMe_Status.Completed
+            });
+            cmbStatus.SelectedItem = CMe_Status.All;
 
             numRuleMinProgress.DecimalPlaces = 1;
             numRuleMaxProgress.DecimalPlaces = 1;
@@ -52,6 +60,8 @@ namespace Depressurizer
             txtRuleName.DataBindings.Add("Text", binding, "Name");
             numRuleMinProgress.DataBindings.Add("Value", binding, "Min");
             numRuleMaxProgress.DataBindings.Add("Value", binding, "Max");
+            cmbStatus.DataBindings.Add("SelectedItem", binding, "Status");
+            cbStopProcessing.DataBindings.Add("Checked", binding, "StopProcessing");
 
             UpdateEnabledSettings();
         }
@@ -95,6 +105,7 @@ namespace Depressurizer
 
             txtRuleName.Enabled =
                 numRuleMaxProgress.Enabled = numRuleMinProgress.Enabled =
+                cmbStatus.Enabled = cbStopProcessing.Enabled =
                         cmdRuleRemove.Enabled = ruleSelected;
             cmdRuleUp.Enabled = ruleSelected && lstRules.SelectedIndex != 0;
             cmdRuleDown.Enabled = ruleSelected = ruleSelected && lstRules.SelectedIndex != lstRules.Items.Count - 1;

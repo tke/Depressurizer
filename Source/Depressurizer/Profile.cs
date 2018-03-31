@@ -169,13 +169,15 @@ namespace Depressurizer
 			list.Add(ach);
             
             //By CME
-            AutoCatCompletionistMe cme = new AutoCatCompletionistMe("By C.me", null, "(C.me) ", false);
-            cme.Rules.Add(new CMe_Rule(" 0-20", 0, 20));
-            cme.Rules.Add(new CMe_Rule("20-40", 20, 40));
-            cme.Rules.Add(new CMe_Rule("40-60", 40, 60));
-            cme.Rules.Add(new CMe_Rule("60-80", 60, 80));
-            cme.Rules.Add(new CMe_Rule("80-100", 80, 100));
-            cme.Rules.Add(new CMe_Rule("Hundo", 100, 0));
+            AutoCatCompletionistMe cme = new AutoCatCompletionistMe(GlobalStrings.Profile_DefaultAutoCatName_CMe, null, "(c.me) ", false);
+            cme.Rules.Add(new CMe_Rule("Completed", 0, 0, CMe_Status.Completed, false));
+            cme.Rules.Add(new CMe_Rule("Under-par", 0, 0, CMe_Status.UnderPar, false));
+            cme.Rules.Add(new CMe_Rule("Over-par", 0, 0, CMe_Status.OverPar, false));
+            cme.Rules.Add(new CMe_Rule(" 0-20%", 0, 20));
+            cme.Rules.Add(new CMe_Rule("20-40%", 20, 40));
+            cme.Rules.Add(new CMe_Rule("40-60%", 40, 60));
+            cme.Rules.Add(new CMe_Rule("60-80%", 60, 80));
+            cme.Rules.Add(new CMe_Rule("80-100%", 80, 100));
             list.Add(cme);
 
             //By Platform

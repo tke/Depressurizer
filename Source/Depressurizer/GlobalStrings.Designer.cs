@@ -3540,6 +3540,15 @@ namespace Depressurizer {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to By completionist.me.
+        /// </summary>
+        internal static string Profile_DefaultAutoCatName_CMe {
+            get {
+                return ResourceManager.GetString("Profile_DefaultAutoCatName_CMe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to By Developer.
         /// </summary>
         internal static string Profile_DefaultAutoCatName_Developer {

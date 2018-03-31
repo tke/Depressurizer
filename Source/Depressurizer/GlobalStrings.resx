@@ -1404,4 +1404,7 @@ This could take up to a few seconds per game.</value>
   <data name="AutoCat_Name_CompletionistMe" xml:space="preserve">
     <value>Completionist.me</value>
   </data>
+  <data name="Profile_DefaultAutoCatName_CMe" xml:space="preserve">
+    <value>By completionist.me</value>
+  </data>
 </root>

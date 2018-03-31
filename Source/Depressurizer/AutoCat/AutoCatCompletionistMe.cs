@@ -1,28 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using DepressurizerCore.Models;
 using DepressurizerCore.Helpers;
 using HtmlAgilityPack;
 using System.Xml;
 using System.Xml.Serialization;
+using System.ComponentModel;
 
 namespace Depressurizer
 {
+    public enum CMe_Status
+    {
+        [Description("Any Status")] All,
+        [Description("Under-par")] UnderPar,
+        [Description("Over-par")] OverPar,
+        [Description("Completed")] Completed
+    }
+
+    public class CMe_State
+    {
+        public int AppId { get; set; }
+        public CMe_Status Status { get; set; } 
+        public float Progress { get; set; }
+    }
+
     public class CMe_Rule
     {
         [XmlElement("Text")]
         public string Name { get; set; }
         public float Min { get; set; }
         public float Max { get; set; }
+        public CMe_Status Status { get; set; } = CMe_Status.All;
+        public bool StopProcessing { get; set; } = false;
 
-        public CMe_Rule(string name, float minProgress, float maxProgress)
+        public CMe_Rule(string name, float minProgress, float maxProgress, CMe_Status status = CMe_Status.All, bool stopProcessing = true)
         {
             Name = name;
             Min = minProgress;
             Max = maxProgress;
+            Status = status;
+            StopProcessing = stopProcessing;
         }
 
         //XmlSerializer requires a parameterless constructor
@@ -33,6 +50,8 @@ namespace Depressurizer
             Name = other.Name;
             Min = other.Min;
             Max = other.Max;
+            Status = other.Status;
+            StopProcessing = other.StopProcessing;
         }
     }
 
@@ -47,7 +66,7 @@ namespace Depressurizer
         public List<CMe_Rule> Rules;
 
         [XmlIgnore]
-        private IDictionary<int, float> CMeProgress { get; set; } = new Dictionary<int, float>();
+        private IDictionary<int, CMe_State> CMeProgress { get; set; } = new Dictionary<int, CMe_State>();
 
         public override AutoCatType AutoCatType
         {
@@ -59,12 +78,14 @@ namespace Depressurizer
         public const string XmlName_Name = "Name",
             XmlName_Filter = "Filter",
             XmlName_Prefix = "Prefix",
-            XmlName_IncludeUnknown = "IncludeUnknown",
-            XmlName_UnknownText = "UnknownText",
+            XmlName_IncludeUnstarted = "IncludeUnstarted",
+            XmlName_UnstartedText = "UnstartedText",
             XmlName_Rule = "Rule",
             XmlName_Rule_Text = "Text",
             XmlName_Rule_Min = "Min",
-            XmlName_Rule_Max = "Max";
+            XmlName_Rule_Max = "Max",
+            XmlName_Rule_Status = "Status",
+            XmlName_Rule_StopProcessing = "StopProcessing";
 
         #endregion
 
@@ -78,7 +99,7 @@ namespace Depressurizer
             Prefix = prefix;
             IncludeUnstarted = includeUnstarted;
             UnstartedText = unstartedText;
-            Rules = (rules == null) ? new List<CMe_Rule>() : rules;
+            Rules = rules ?? new List<CMe_Rule>();
             Selected = selected;
         }
 
@@ -108,11 +129,10 @@ namespace Depressurizer
         public override void PreProcess(GameList games, Database db)
         {
             base.PreProcess(games, db);
-            var results = ScrapeUserProgress(FormMain.CurrentProfile.SteamID64).ToList<KeyValuePair<int, float>>();
-            CMeProgress = results.ToDictionary(kv => kv.Key, kv => kv.Value);
+            CMeProgress = ScrapeUserProgress(FormMain.CurrentProfile.SteamID64).ToDictionary(kv => kv.AppId);
         }
 
-        private IEnumerable<KeyValuePair<int, float>> ScrapeUserProgress(long steamId)
+        private IEnumerable<CMe_State> ScrapeUserProgress(long steamId)
         {
             HtmlWeb htmlWeb = new HtmlWeb();
             for(var page = 1; ; page++)
@@ -123,7 +143,7 @@ namespace Depressurizer
                     foreach (HtmlNode gameDiv in gameDivs)
                     {
                         var res = ExtractGameProgress(gameDiv);
-                        if (res != null) yield return res.Value;
+                        if (res != null) yield return res;
                         else yield break;
                     }
                 }
@@ -141,13 +161,24 @@ namespace Depressurizer
             return gameDivs;
         }
 
-        private static KeyValuePair<int, float>? ExtractGameProgress(HtmlNode gameDiv)
+        private static CMe_State ExtractGameProgress(HtmlNode gameDiv)
         {
             int appId = int.Parse(gameDiv.SelectSingleNode(@".//a").GetAttributeValue("href", null)?.Split('/')?.Last());
-            if (float.TryParse(gameDiv.SelectSingleNode(@".//div[@aria-valuenow]")?.GetAttributeValue("aria-valuenow", "-1"), out float progress))
-                return new KeyValuePair<int, float>(appId, progress);
-            else
-                return null;
+            var progressBar = gameDiv.SelectSingleNode(@".//div[@role='progressbar']");
+            if (progressBar != null)
+            {
+                var pbClass = progressBar.GetAttributeValue("class", "");
+                CMe_Status? status = null;
+                if (pbClass.Contains("progress-bar-perfect"))
+                    status = CMe_Status.Completed;
+                else if (pbClass.Contains("progress-bar-warning"))
+                    status = CMe_Status.UnderPar;
+                else if (pbClass.Contains("progress-bar-success"))
+                    status = CMe_Status.OverPar;
+                if (status != null && float.TryParse(progressBar?.GetAttributeValue("aria-valuenow", "-1"), out float progress))
+                    return new CMe_State { AppId = appId, Progress = progress, Status = status.Value };
+            }
+            return null;
         }
 
         public override AutoCatResult CategorizeGame(GameInfo game, Filter filter)
@@ -163,13 +194,13 @@ namespace Depressurizer
             string result = null;
             if (CMeProgress.ContainsKey(game.Id))
             {
-                float score = CMeProgress[game.Id];
+                CMe_State state = CMeProgress[game.Id];
                 foreach(var rule in Rules)
                 {
-                    if(CheckRule(rule, score))
+                    if(CheckRule(rule, state))
                     {
-                        result = rule.Name;
-                        break;
+                        game.AddCategory(games.GetCategory(GetProcessedString(rule.Name)));
+                        if (rule.StopProcessing) break;
                     }
                 }
             }
@@ -177,20 +208,14 @@ namespace Depressurizer
             {
                 result = UnstartedText;
             }
-
-            if (result != null)
-            {
-                result = GetProcessedString(result);
-                game.AddCategory(games.GetCategory(result));
-            }
             return AutoCatResult.Success;
         }
 
 
-        private bool CheckRule(CMe_Rule rule, float progress)
-        {
-            return (progress >= rule.Min && (progress < rule.Max || rule.Max == 0.0f));
-        }
+        private bool CheckRule(CMe_Rule rule, CMe_State state) => 
+            state.Progress >= rule.Min 
+            && (state.Progress < rule.Max || rule.Max == 0.0f)
+            && (state.Status == rule.Status || rule.Status == CMe_Status.All);
 
         private string GetProcessedString(string s)
         {
@@ -209,8 +234,8 @@ namespace Depressurizer
             writer.WriteElementString(XmlName_Name, Name);
             if (Filter != null) writer.WriteElementString(XmlName_Filter, Filter);
             if (Prefix != null) writer.WriteElementString(XmlName_Prefix, Prefix);
-            writer.WriteElementString(XmlName_IncludeUnknown, IncludeUnstarted.ToString().ToLowerInvariant());
-            writer.WriteElementString(XmlName_UnknownText, UnstartedText);
+            writer.WriteElementString(XmlName_IncludeUnstarted, IncludeUnstarted.ToString().ToLowerInvariant());
+            writer.WriteElementString(XmlName_UnstartedText, UnstartedText);
 
 
             foreach (CMe_Rule rule in Rules)
@@ -219,6 +244,8 @@ namespace Depressurizer
                 writer.WriteElementString(XmlName_Rule_Text, rule.Name);
                 writer.WriteElementString(XmlName_Rule_Min, rule.Min.ToString());
                 writer.WriteElementString(XmlName_Rule_Max, rule.Max.ToString());
+                writer.WriteElementString(XmlName_Rule_Status, rule.Status.ToString());
+                writer.WriteElementString(XmlName_Rule_StopProcessing, rule.StopProcessing.ToString());
 
                 writer.WriteEndElement();
             }
@@ -230,8 +257,8 @@ namespace Depressurizer
             string name = XmlUtil.GetStringFromNode(xElement[XmlName_Name], TypeIdString);
             string filter = XmlUtil.GetStringFromNode(xElement[XmlName_Filter], null);
             string prefix = XmlUtil.GetStringFromNode(xElement[XmlName_Prefix], string.Empty);
-            bool includeUnknown = XmlUtil.GetBoolFromNode(xElement[XmlName_IncludeUnknown], false);
-            string unknownText = XmlUtil.GetStringFromNode(xElement[XmlName_UnknownText], string.Empty);
+            bool includeUnstarted = XmlUtil.GetBoolFromNode(xElement[XmlName_IncludeUnstarted], false);
+            string unstartedText = XmlUtil.GetStringFromNode(xElement[XmlName_UnstartedText], string.Empty);
 
             List<CMe_Rule> rules = new List<CMe_Rule>();
             foreach (XmlNode node in xElement.SelectNodes(XmlName_Rule))
@@ -239,9 +266,11 @@ namespace Depressurizer
                 string ruleName = XmlUtil.GetStringFromNode(node[XmlName_Rule_Text], string.Empty);
                 float ruleMin = XmlUtil.GetFloatFromNode(node[XmlName_Rule_Min], 0);
                 float ruleMax = XmlUtil.GetFloatFromNode(node[XmlName_Rule_Max], 0);
-                rules.Add(new CMe_Rule(ruleName, ruleMin, ruleMax));
+                CMe_Status ruleStatus = XmlUtil.GetEnumFromNode(node[XmlName_Rule_Status], CMe_Status.All);
+                bool ruleStopProcessing = XmlUtil.GetBoolFromAttribute(node, XmlName_Rule_StopProcessing, false);
+                rules.Add(new CMe_Rule(ruleName, ruleMin, ruleMax, ruleStatus, ruleStopProcessing));
             }
-            AutoCatCompletionistMe result = new AutoCatCompletionistMe(name, filter, prefix, includeUnknown, unknownText) { Rules = rules };
+            AutoCatCompletionistMe result = new AutoCatCompletionistMe(name, filter, prefix, includeUnstarted, unstartedText) { Rules = rules };
             return result;
         }
 
